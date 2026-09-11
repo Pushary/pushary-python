@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pushary"
-version = "2.1.0"
+version = "2.1.1"
 description = "Human-in-the-loop decisions SDK for Pushary: create a decision, ask a specific end-user to approve, and resume on their answer via webhook or poll."
 readme = "README.md"
 requires-python = ">=3.9"
