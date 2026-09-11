@@ -1,0 +1,10 @@
+build==1.4.4
+hatchling==1.27.0
+importlib_metadata==8.7.1
+packaging==26.3
+pathspec==1.1.1
+pluggy==1.6.0
+pyproject_hooks==1.2.0
+tomli==2.4.1
+trove-classifiers==2026.6.1.19
+zipp==3.23.1

@@ -1,0 +1,52 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pushary"
+version = "2.1.0"
+description = "Human-in-the-loop decisions SDK for Pushary: create a decision, ask a specific end-user to approve, and resume on their answer via webhook or poll."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Pushary", email = "aadil@pushary.com" }]
+maintainers = [{ name = "Pushary", email = "aadil@pushary.com" }]
+keywords = [
+    "human-in-the-loop",
+    "ai-agents",
+    "approvals",
+    "webhooks",
+    "notifications",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://pushary.com"
+Documentation = "https://pushary.com/docs"
+Repository = "https://github.com/Pushary/pushary-python"
+Issues = "https://github.com/Pushary/pushary-python/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pushary"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/pushary",
+    "README.md",
+    "LICENSE",
+    "tests",
+]
