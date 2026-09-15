@@ -34,3 +34,12 @@ jobs:
           python-version: '3.12'
       - run: python -m pip install -r examples/strands/requirements.txt
       - run: python examples/strands/check_review.py -v
+  llamaindex:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r examples/llamaindex/requirements.txt
+      - run: python examples/llamaindex/check_review.py -v

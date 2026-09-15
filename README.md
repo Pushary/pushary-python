@@ -18,6 +18,11 @@ pip install pushary
 The reusable hook uses native interrupts and snapshots with this SDK. Its runnable
 checks cover changed actions, denial, retries, concurrent workers, and crash recovery.
 
+## LlamaIndex Workflows customer approvals
+
+[Pause an application action for a phone decision and restore its native context in a new worker](examples/llamaindex/README.md).
+Includes a reusable workflow, a phone demonstration, and offline restart/failure checks.
+
 ## API key
 
 The SDK needs your full API key (`pk_xxx.sk_xxx`), which includes the secret
