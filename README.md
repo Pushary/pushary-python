@@ -12,6 +12,12 @@ dependency (Python standard library only) and targets Python 3.9 and newer.
 pip install pushary
 ```
 
+## Strands Agents customer approvals
+
+[Pause a Strands tool call, request customer approval, and resume after a worker restart](examples/strands/README.md).
+The reusable hook uses native interrupts and snapshots with this SDK. Its runnable
+checks cover changed actions, denial, retries, concurrent workers, and crash recovery.
+
 ## API key
 
 The SDK needs your full API key (`pk_xxx.sk_xxx`), which includes the secret

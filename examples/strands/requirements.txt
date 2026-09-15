@@ -1,0 +1,2 @@
+pushary==2.1.1
+strands-agents==1.55.1
