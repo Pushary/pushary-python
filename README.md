@@ -14,6 +14,8 @@ pip install pushary
 
 ## Dify Human Input customer approvals
 
+[Persist an Agno workflow pause and resume after customer phone approval](examples/agno/README.md).
+
 [Pause a Dify workflow, request customer phone approval, and resume its native form](examples/dify/README.md).
 The backend effect stays behind a one-use permit. Includes native-engine offline
 checks, setup instructions and a local-order demo; live deployment validation is required.
