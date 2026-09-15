@@ -12,6 +12,12 @@ dependency (Python standard library only) and targets Python 3.9 and newer.
 pip install pushary
 ```
 
+## Haystack customer approvals
+
+[Install the Haystack component](https://github.com/Pushary/pushary-haystack) to
+protect an application-owned action with customer phone approval and one-use
+execution permits. Includes a serialized-pipeline restart demo and offline checks.
+
 ## Strands Agents customer approvals
 
 [Pause a Strands tool call, request customer approval, and resume after a worker restart](examples/strands/README.md).
