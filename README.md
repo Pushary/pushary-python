@@ -12,6 +12,12 @@ dependency (Python standard library only) and targets Python 3.9 and newer.
 pip install pushary
 ```
 
+## Microsoft Agent Framework customer approvals
+
+[Pause an order workflow, request customer phone approval, and restore its native
+checkpoint in a new worker](examples/microsoft/README.md). Uses the existing SDK
+and one-use execution permits; includes offline failure checks and a local-order demo.
+
 ## Haystack customer approvals
 
 [Install the Haystack component](https://github.com/Pushary/pushary-haystack) to
