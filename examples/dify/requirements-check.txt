@@ -1,0 +1,4 @@
+-r requirements.txt
+# Native workflow engine pinned by Dify 1.17.1; only needed for offline checks.
+graphon==0.7.0
+PyYAML==6.0.3

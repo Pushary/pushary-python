@@ -12,6 +12,12 @@ dependency (Python standard library only) and targets Python 3.9 and newer.
 pip install pushary
 ```
 
+## Dify Human Input customer approvals
+
+[Pause a Dify workflow, request customer phone approval, and resume its native form](examples/dify/README.md).
+The backend effect stays behind a one-use permit. Includes native-engine offline
+checks, setup instructions and a local-order demo; live deployment validation is required.
+
 ## Microsoft Agent Framework customer approvals
 
 [Pause an order workflow, request customer phone approval, and restore its native
