@@ -1,47 +1,21 @@
 # pushary
 
-Human-in-the-loop decisions for AI products, in Python. Create a decision, ask a
-specific end-user to approve it, and resume on their answer via webhook or poll.
+The decision layer for AI agents. Your agent asks, your user decides on their phone.
 
 This is the Python counterpart of the `@pushary/server` SDK. It is zero
 dependency (Python standard library only) and targets Python 3.9 and newer.
+
+## What you need
+
+- A Pushary Partner plan, from $99 a month. [Start the trial](https://pushary.com/sign-up?from=agent&plan=partner).
+- An API key from [Partner onboarding](https://pushary.com/onboarding/partner), set as `PUSHARY_API_KEY`.
+- Your users install the free Pushary app ([iPhone](https://apps.apple.com/us/app/pushary/id6785677563), [Android](https://play.google.com/store/apps/details?id=com.pushary.app)). They never sign up or pay.
 
 ## Installation
 
 ```bash
 pip install pushary
 ```
-
-## Dify Human Input customer approvals
-
-[Persist an Agno workflow pause and resume after customer phone approval](examples/agno/README.md).
-
-[Pause a Dify workflow, request customer phone approval, and resume its native form](examples/dify/README.md).
-The backend effect stays behind a one-use permit. Includes native-engine offline
-checks, setup instructions and a local-order demo; live deployment validation is required.
-
-## Microsoft Agent Framework customer approvals
-
-[Pause an order workflow, request customer phone approval, and restore its native
-checkpoint in a new worker](examples/microsoft/README.md). Uses the existing SDK
-and one-use execution permits; includes offline failure checks and a local-order demo.
-
-## Haystack customer approvals
-
-[Install the Haystack component](https://github.com/Pushary/pushary-haystack) to
-protect an application-owned action with customer phone approval and one-use
-execution permits. Includes a serialized-pipeline restart demo and offline checks.
-
-## Strands Agents customer approvals
-
-[Pause a Strands tool call, request customer approval, and resume after a worker restart](examples/strands/README.md).
-The reusable hook uses native interrupts and snapshots with this SDK. Its runnable
-checks cover changed actions, denial, retries, concurrent workers, and crash recovery.
-
-## LlamaIndex Workflows customer approvals
-
-[Pause an application action for a phone decision and restore its native context in a new worker](examples/llamaindex/README.md).
-Includes a reusable workflow, a phone demonstration, and offline restart/failure checks.
 
 ## API key
 
@@ -56,17 +30,16 @@ from pushary import PusharyServer
 pushary = PusharyServer(api_key=os.environ["PUSHARY_API_KEY"])
 ```
 
-## Two calls to add human-in-the-loop
+## Quick start: two calls
 
-Connect an end-user's phone once, then ask them whenever your agent needs a human.
-Requires the Partner plan.
+Connect a user's phone once, then ask them whenever your agent needs a yes.
 
 ```python
-# 1. Connect an end-user's phone (keyless, no account for them). Show the link.
+# 1. Once per user: connect their phone. They need no account. Show them the link.
 enrolled = pushary.enroll("user_123")
 # Render enrolled["universalLink"] as a button or QR. One tap turns on approvals.
 
-# 2. Ask that person and block until they answer. Fail-closed approved flag.
+# 2. Ask that person and wait for the answer. approved is True only for a yes.
 decision = pushary.decisions.ask(
     question="Issue a $50 refund?",
     external_id="user_123",
@@ -76,10 +49,45 @@ if decision["approved"]:
     issue_refund()
 ```
 
-`ask` creates a fresh decision per call and polls
-durably until the human answers or the deadline passes (default 55 seconds). `approved` is true only when the person actually said yes, so a
+`ask` creates a fresh decision per call and waits
+until the person answers or the deadline passes (default 55 seconds). `approved` is true only when the person actually said yes, so a
 declined, expired, or unanswered decision safely blocks the action. For longer
 waits or your own resume logic, use `create` plus a webhook or `get` below.
+
+## Framework recipes
+
+### Agno
+
+[Persist an Agno workflow pause and resume after customer phone approval](examples/agno/README.md).
+
+### Dify
+
+[Pause a Dify workflow, request customer phone approval, and resume its native form](examples/dify/README.md).
+The backend effect stays behind a one-use permit. Includes native-engine offline
+checks, setup instructions and a local-order demo; live deployment validation is required.
+
+### Microsoft Agent Framework
+
+[Pause an order workflow, request customer phone approval, and restore its native
+checkpoint in a new worker](examples/microsoft/README.md). Uses the existing SDK
+and one-use execution permits; includes offline failure checks and a local-order demo.
+
+### Haystack
+
+[Install the Haystack component](https://github.com/Pushary/pushary-haystack) to
+protect an application-owned action with customer phone approval and one-use
+execution permits. Includes a serialized-pipeline restart demo and offline checks.
+
+### Strands Agents
+
+[Pause a Strands tool call, request customer approval, and resume after a worker restart](examples/strands/README.md).
+The reusable hook uses native interrupts and snapshots with this SDK. Its runnable
+checks cover changed actions, denial, retries, concurrent workers, and crash recovery.
+
+### LlamaIndex Workflows
+
+[Pause an application action for a phone decision and restore its native context in a new worker](examples/llamaindex/README.md).
+Includes a reusable workflow, a phone demonstration, and offline restart/failure checks.
 
 ## Human-in-the-loop decisions
 

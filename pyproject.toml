@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "pushary"
 version = "2.1.1"
-description = "Human-in-the-loop decisions SDK for Pushary: create a decision, ask a specific end-user to approve, and resume on their answer via webhook or poll."
+description = "The decision layer for AI agents. Your agent asks, your user decides on their phone."
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }
@@ -17,6 +17,8 @@ keywords = [
     "approvals",
     "webhooks",
     "notifications",
+    "approval",
+    "tool-approval",
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
