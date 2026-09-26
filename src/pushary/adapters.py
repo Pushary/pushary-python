@@ -153,6 +153,7 @@ def _gate_key(ask: "ApprovalAsk", facts: Optional[Dict[str, Any]]) -> str:
         "input": ask.input,
         "parameters": facts,
         "presentation": ask.presentation,
+        **({"context": ask.context} if ask.context is not None else {}),
     })
 
 
@@ -251,6 +252,7 @@ class ApprovalAsk:
         "input",
         "parameters",
         "presentation",
+        "context",
     )
 
     def __init__(
@@ -267,6 +269,7 @@ class ApprovalAsk:
         input: Any = None,
         parameters: Optional[Dict[str, Any]] = None,
         presentation: Optional[Dict[str, Any]] = None,
+        context: Optional[str] = None,
     ) -> None:
         self.tool_name = tool_name
         self.call_id = call_id
@@ -286,6 +289,7 @@ class ApprovalAsk:
         #: Explicit facts for policy, used instead of deriving them from ``input``.
         self.parameters = parameters
         self.presentation = presentation
+        self.context = context
 
 
 class ApprovalDecision:
@@ -689,6 +693,7 @@ class AdapterKernel:
                 ask.question,
                 type="confirm",
                 external_id=ask.external_id,
+                context=ask.context,
                 agent_name=agent_name,
                 expires_in_seconds=expires_in_seconds,
                 timeout_seconds=timeout_seconds,

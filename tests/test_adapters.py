@@ -268,6 +268,55 @@ class GateTests(unittest.TestCase):
         self.assertEqual(keys[0], keys[1])
         self.assertNotEqual(keys[0], keys[2])
 
+    def test_shows_the_approver_the_context(self):
+        decisions = FakeDecisions(ask_result={"answered": True, "approved": True, "value": "yes", "decisionId": "d1"})
+        with WithFakeClient(FakeClient(decisions=decisions)):
+            kernel.create_gate()(
+                ApprovalAsk(
+                    tool_name="issue_refund",
+                    call_id="call_1",
+                    session_id="sess_1",
+                    question="Approve?",
+                    external_id="user_1",
+                    context='Tool arguments: {"amount": 99999}',
+                )
+            )
+        self.assertEqual(decisions.ask_calls[0]["context"], 'Tool arguments: {"amount": 99999}')
+
+    def test_context_is_part_of_the_approval_identity(self):
+        decisions = FakeDecisions(ask_result={"answered": True, "approved": True, "value": "yes", "decisionId": "d1"})
+        with WithFakeClient(FakeClient(decisions=decisions)):
+            gate = kernel.create_gate()
+            for context in ("Refund 5", "Refund 99999"):
+                gate(
+                    ApprovalAsk(
+                        tool_name="issue_refund",
+                        call_id="call_1",
+                        session_id="sess_1",
+                        question="Approve?",
+                        external_id="user_1",
+                        context=context,
+                    )
+                )
+        first, second = (call["idempotency_key"] for call in decisions.ask_calls)
+        self.assertNotEqual(first, second)
+
+    def test_an_ask_without_context_keeps_the_key_it_had_before_context_existed(self):
+        decisions = FakeDecisions(ask_result={"answered": True, "approved": True, "value": "yes", "decisionId": "d1"})
+        with WithFakeClient(FakeClient(decisions=decisions)):
+            kernel.create_gate()(
+                ApprovalAsk(
+                    tool_name="issue_refund",
+                    call_id="call_1",
+                    session_id="sess_1",
+                    question="Approve?",
+                    external_id="user_1",
+                    input={"amount": 5},
+                )
+            )
+        self.assertIsNone(decisions.ask_calls[0]["context"])
+        self.assertEqual(decisions.ask_calls[0]["idempotency_key"], "135e90787543c78d72b7008ce463da08d1ce8769")
+
     def test_allows_without_opening_a_decision_or_paging_anyone(self):
         decisions = FakeDecisions()
         client = FakeClient(

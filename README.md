@@ -259,3 +259,7 @@ Shared approval gates now bind decision identity to the customer, session, tool 
 These keys intentionally differ from 2.0. Do not replay completed operations during upgrade or silently migrate an old approval onto a new key. Drain pending runs on their original version, or explicitly request fresh review while preserving your application's operation idempotency. `policy=False` now records the full subject and presentation on the human decision; a failed legacy policy endpoint retains the prior minimal fallback for compatibility.
 
 `decisions.create` and `decisions.ask` accept `presentation`, using the existing server-validated shape with `label`, `effect`, optional `risk`, and `changes` that reference keys in `parameters`. Shared `ask_human` and `create_durable_decision` helpers forward that field plus target, actor, environment, parameters, placeholder, expiry, reachability, and callback settings. Parameter values remain the source of truth for display; presentation changes name a parameter rather than carrying a second copy of its value.
+
+### Upgrading to 2.2
+
+`ApprovalAsk` accepts `context`. The shared approval gate sends it with the decision, so the approver can read what the notification cannot fit, such as a tool's full arguments. Context is part of the approval identity when set. An ask without context keeps the key it had in 2.1, so pending approvals carry over.
