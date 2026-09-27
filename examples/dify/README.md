@@ -83,14 +83,20 @@ export DIFY_NODE_ID='review'
 second workflow. A pending result is reported as `blocked` with the SDK's reason.
 After approval, the result contains the released local order. Inspect `orders.db`
 inside the state directory: the business idempotency key is unique. Re-running
-`resume` after submission stops because the native form is already closed.
+`resume` after a committed order returns that order with `"recovered": true`, using
+read-only backend evidence even when the native form is closed or approval has expired.
+This reports an existing effect; it does not authorize another one.
 
 For your backend, import `start` and `resume` from [review.py](review.py). Supply
 tenant/customer IDs and the action from authenticated application state, never
 model output. The CLI's `demo-store` tenant and test order are demonstration data.
 Pass your business callback to `resume`; it receives a copy of the exact approved
 parameters and a stable idempotency key. Your downstream service must also enforce
-that key if it can retry internally.
+that key if it can retry internally. Optionally supply a trusted, read-only `lookup`
+callback with the same arguments: return the verified committed result, return `None`
+when completion is unconfirmed, or raise when evidence is unavailable or contradictory.
+Without `lookup`, the original stop-and-reconcile behavior is unchanged. Never use a
+Dify success flag, approval answer, or worker-local success cache as backend evidence.
 
 ## Trust and recovery limits
 
@@ -107,13 +113,56 @@ that key if it can retry internally.
   the one-hour Pushary request; both deadlines are checked before the effect.
 - The SDK consumes the remote one-use permit **before** native submission. Dify
   also makes forms one-shot. A lost submission response, native resume taking over
-  30 seconds, worker crash or uncertain business result needs operator reconciliation.
-  The spent permit is not reset and the effect is not automatically retried.
+  30 seconds, worker crash or uncertain business result needs reconciliation.
+  The SQLite demo automatically reads back a committed order and its matching backend
+  receipt. Without that evidence it stops for operator reconciliation. The spent
+  permit is not reset and the effect is not automatically retried.
 - If initial workflow creation fails before the pause is saved, inspect Dify's run
   logs. Do not delete the state directory and blindly start another operation.
 - Dify workspace administrators and anyone who controls your backend remain trusted.
   This example does not intercept arbitrary agent tools or secure a separate effect
   placed directly in Dify.
+
+## Recovery evidence and interruption checkpoints
+
+The demo's backend is `orders.db`, separate from Dify and the Pushary permit service.
+`release_order` commits the order and a receipt containing **all** approved parameters
+under the same binding in one SQLite transaction. `lookup_order` opens that database
+read-only and reads both rows in one snapshot. Both must match before it reports
+`released`; a missing row, mismatched parameters, corrupt database or legacy schema
+cannot become recovered success. Existing databases without the new receipt table
+require manual reconciliation; do not delete them to force a fresh execution.
+
+The binding includes tenant, customer, native run, workflow version, form, parameters
+and deadline. Caller identity and saved operation integrity are checked before lookup.
+Only the permit-protected callback writes orders. Lookup never submits a form, consumes
+a permit, executes an effect or changes a receipt. A late callback exception triggers
+another readback before the SDK reports an outcome. Verified completion therefore
+survives that exception. There is no mutable local completion status for an older
+worker to overwrite; the committed order and receipt remain the source of truth.
+
+| Interruption | Backend evidence | Restart outcome | New effect |
+| --- | --- | --- | --- |
+| Permit consumed, response lost | No order | Blocked/unconfirmed permit | None |
+| Native form committed, response lost | No order | Stop for reconciliation | None |
+| Worker dies before backend effect | No order | Stop for reconciliation | None |
+| Order and receipt commit, worker dies before returning | Matching order and receipt | `released`, `recovered: true` | None |
+| Worker B verifies completion before worker A's delayed exception | Matching order and receipt | B recovers; A reads back success; subsequent resumes recover | None |
+| SDK receipt reporting is unavailable | Matching order and receipt | Backend success remains recoverable | None |
+| Backend evidence is missing, inconsistent or unreadable | Unverified | Stop; never invent success | None |
+
+The backend receipt is distinct from Pushary's hosted execution receipt. A process
+killed before SDK reporting can leave the hosted permit marked running; this example
+**does not repair that hosted receipt** or claim that its status proves the business
+outcome. After a recoverable delayed callback exception, the still-running worker can
+report SDK success normally. An operator must reconcile a receipt left by a dead worker.
+
+This is a local synthetic comparison with [Mission's proposed checkpoint](https://github.com/langgenius/dify/discussions/42319#discussioncomment-18625206): backend
+commit → lost worker response → fresh-process lookup. It is not a Mission integration,
+a distributed exactly-once guarantee, or proof of live Dify/phone-service recovery.
+For a remote backend, implement lookup using that provider's authoritative operation
+identifier, exact subject and durable committed evidence; an absent lookup result alone
+must never authorize resending an uncertain operation.
 
 ## Verification
 
@@ -126,9 +175,14 @@ The checks use Dify's **real Graphon 0.7.0** Human Input node, graph engine and
 serialized runtime snapshots, plus the published Pushary SDK. They run fresh
 processes across pause/resume and cover pending, approval, denial, expiry,
 cancellation, customer/version/parameter changes, duplicate workers, a competing
-native submitter, lost permit/submission responses and a crash after the effect.
+native submitter, lost permit/submission responses and crashes before/after the effect.
+They use the actual SQLite order writer and readback, compare restart with and without
+lookup, assert one order and one matching receipt, and exercise worker B's recovery
+before worker A's delayed error. They also reject corrupt, incomplete, legacy and
+mismatched evidence and verify readback after approval expiry.
 
-Both hosted HTTP services and the order service are simulated in these checks.
+Both hosted HTTP services are simulated; the test backend uses real local SQLite
+transactions and the demo's order writer/readback.
 Dify Cloud import and a Studio pause → approve → resume smoke test were also
 verified on 2026-09-15. The automated checks do **not** prove its database/Celery
 delivery or live phone delivery. Run the test-phone procedure above against your deployment

@@ -1,4 +1,5 @@
 """Real Dify graph engine and Pushary SDK; both hosted HTTP services are simulated."""
+from functools import partial
 import io
 import json
 import os
@@ -26,6 +27,7 @@ from graphon.runtime import GraphRuntimeState, VariablePool
 from graphon.variables.factory import build_segment
 from pushary.errors import PusharyError
 import review
+import run as demo
 
 
 def native(snapshot=None, action=None, question=""):
@@ -134,19 +136,32 @@ def pushary_http(self, method, path, *, body=None, **kwargs):
                 patch("review.time.time", return_value=time.time() + 7200).start()
             return {"permitId": body["authorizationId"]}
         if path.endswith("/receipt"):
-            conn.execute("update permits set outcome=?", (body["outcome"],))
+            if os.environ.get("CHECK_RECEIPT_LOST"):
+                raise TimeoutError("Receipt transport unavailable")
+            conn.execute("update permits set outcome=? where outcome='running'", (body["outcome"],))
             return {}
         raise AssertionError(path)
 
 
-def effect(parameters, binding):
+def effect(folder, parameters, binding):
     with db() as conn:
         assert conn.execute("select status from workflow").fetchone()[0] == "succeeded"
         assert conn.execute("select count(*) from permits").fetchone()[0] == 1
         conn.execute("insert into effects values (?)", (binding,))
+    if os.environ.get("CHECK_BEFORE_EFFECT"):
+        os._exit(23)
+    result = demo.release_order(Path(folder), parameters, binding)
     if os.environ.get("CHECK_CRASH"):
         os._exit(23)
-    return parameters
+    if os.environ.get("CHECK_LATE_ERROR"):
+        Path(folder, "committed").touch()
+        deadline = time.monotonic() + 20
+        while not Path(folder, "release-error").exists():
+            if time.monotonic() >= deadline:
+                raise AssertionError("Reconciliation worker did not finish")
+            time.sleep(0.02)
+        raise TimeoutError("Old worker lost its response after commit")
+    return result
 
 
 def worker(mode, folder, config):
@@ -155,8 +170,12 @@ def worker(mode, folder, config):
         if mode == "start":
             review.start(folder, **config)
             return "paused"
-        return review.resume(folder, effect, **{key: config[key] for key in
-            ("base_url", "workflow_id", "tenant_id", "external_id")})
+        lookup = None if os.environ.get("CHECK_NO_LOOKUP") else partial(demo.lookup_order, Path(folder))
+        if os.environ.get("CHECK_EXPIRED_READBACK"):
+            patch("review.time.time", return_value=time.time() + 7200).start()
+        return review.resume(folder, partial(effect, folder), lookup=lookup,
+                             **{key: config[key] for key in
+                                ("base_url", "workflow_id", "tenant_id", "external_id")})
 
 
 def main():
@@ -199,8 +218,10 @@ def main():
         run("resume", folder)
         assert len(sql("select * from decisions")) == 1
         sql("update decisions set status='yes'")
-        assert run("resume", folder)["result"] == config["parameters"]
-        run("resume", folder, code=1)
+        released = {"order_id": "order-1", "status": "released"}
+        recovered = {"result": released, "recovered": True}
+        assert run("resume", folder)["result"] == released
+        assert run("resume", folder) == recovered
         assert len(sql("select * from effects")) == 1
         for status in ("no", "expired", "cancelled"):
             folder = new(); sql(f"update decisions set status='{status}'")
@@ -224,13 +245,117 @@ def main():
             folder = new(); sql("update decisions set status='yes'")
             run("resume", folder, code=code, **{flag: "1"})
             assert len(sql("select * from effects")) == effects
-            proc = spawn("resume", folder); proc.communicate(timeout=30)
+            if flag == "CHECK_CRASH":
+                run("resume", folder, code=1, CHECK_NO_LOOKUP="1")
+                assert run("resume", folder) == recovered
+                assert run("resume", folder, CHECK_EXPIRED_READBACK="1") == recovered
+                with sqlite3.connect(folder / "orders.db") as conn:
+                    assert conn.execute("select count(*) from released").fetchone() == (1,)
+                    assert conn.execute("select count(*) from release_receipts").fetchone() == (1,)
+                assert sql("select outcome from permits") == [("running",)]
+                print("PASS: commit -> process death -> read-only restart; one order, recovered released outcome")
+            else:
+                proc = spawn("resume", folder)
+                output, error = proc.communicate(timeout=30)
+                assert proc.returncode == (1 if flag == "CHECK_SUBMIT_LOST" else 0), error.decode()
+                if proc.returncode == 0:
+                    assert "result" not in json.loads(output)
             assert len(sql("select * from effects")) == effects
         folder = new(); sql("update decisions set status='yes'")
         processes = [spawn("resume", folder) for _ in range(2)]
         for proc in processes:
             proc.communicate(timeout=30)
         assert len(sql("select * from effects")) == 1
+        folder = new(); sql("update decisions set status='yes'")
+        run("resume", folder, code=23, CHECK_BEFORE_EFFECT="1")
+        run("resume", folder, code=1)
+        assert not (folder / "orders.db").exists()
+        assert len(sql("select * from effects")) == 1
+
+        folder = new(); sql("update decisions set status='yes'")
+        assert run("resume", folder, CHECK_RECEIPT_LOST="1")["result"] == released
+        assert sql("select outcome from permits") == [("running",)]
+        assert run("resume", folder) == recovered
+
+        folder = new(); sql("update decisions set status='yes'")
+        old_worker = spawn("resume", folder, CHECK_LATE_ERROR="1")
+        try:
+            deadline = time.monotonic() + 20
+            while not (folder / "committed").exists():
+                assert old_worker.poll() is None, old_worker.communicate()[1].decode()
+                assert time.monotonic() < deadline, "Worker did not reach the post-commit checkpoint"
+                time.sleep(0.02)
+            assert run("resume", folder) == recovered
+            (folder / "release-error").touch()
+            output, error = old_worker.communicate(timeout=30)
+            assert old_worker.returncode == 0, error.decode()
+            assert json.loads(output)["result"] == released
+            assert run("resume", folder) == recovered
+            assert sql("select outcome from permits") == [("succeeded",)]
+            assert len(sql("select * from effects")) == 1
+            with sqlite3.connect(folder / "orders.db") as conn:
+                assert conn.execute("select count(*) from released").fetchone() == (1,)
+                assert conn.execute("select count(*) from release_receipts").fetchone() == (1,)
+            print("PASS: worker B recovers before worker A's late error; order and receipt remain confirmed")
+        finally:
+            if old_worker.poll() is None:
+                old_worker.kill()
+                old_worker.communicate(timeout=10)
+
+        for corruption in ("delete from release_receipts", "delete from released",
+                           "update released set order_id='other-order'",
+                           "update release_receipts set parameters='{}'",
+                           "drop table release_receipts"):
+            folder = new(); sql("update decisions set status='yes'")
+            run("resume", folder, code=23, CHECK_CRASH="1")
+            with sqlite3.connect(folder / "orders.db") as conn:
+                conn.execute(corruption)
+            run("resume", folder, code=1)
+            assert len(sql("select * from effects")) == 1
+
+        folder = new(); sql("update decisions set status='yes'")
+        run("resume", folder, code=23, CHECK_CRASH="1")
+        for key in ("base_url", "workflow_id", "tenant_id", "external_id"):
+            run("resume", folder, {**config, key: "changed"}, code=1)
+        saved = json.loads((folder / "operation.json").read_text())
+        saved["parameters"]["amount_cents"] = 9999
+        (folder / "operation.json").write_text(json.dumps(saved))
+        run("resume", folder, code=1)
+        assert len(sql("select * from effects")) == 1
+        folder = new(); sql("update decisions set status='yes'")
+        run("resume", folder, code=23, CHECK_CRASH="1")
+        (folder / "orders.db").write_bytes(b"not a SQLite database")
+        run("resume", folder, code=1)
+        assert len(sql("select * from effects")) == 1
+
+        backend = Path(temp) / "atomic-backend"
+        backend.mkdir()
+        binding = "test-operation"
+        with sqlite3.connect(backend / "orders.db") as conn:
+            conn.executescript("create table released (id primary key, order_id);"
+                "create table release_receipts (id primary key, parameters text not null);"
+                "create trigger fail_receipt before insert on release_receipts "
+                "begin select raise(abort, 'receipt unavailable'); end;")
+        try:
+            demo.release_order(backend, config["parameters"], binding)
+        except sqlite3.IntegrityError:
+            pass
+        else:
+            raise AssertionError("Order must roll back when its receipt cannot commit")
+        assert demo.lookup_order(backend, config["parameters"], binding) is None
+        with sqlite3.connect(backend / "orders.db") as conn:
+            assert conn.execute("select count(*) from released").fetchone() == (0,)
+            conn.execute("drop trigger fail_receipt")
+        assert demo.release_order(backend, config["parameters"], binding) == released
+        assert demo.release_order(backend, config["parameters"], binding) == released
+        assert demo.lookup_order(backend, config["parameters"], "different-binding") is None
+        try:
+            demo.release_order(backend, {**config["parameters"], "amount_cents": 9999}, binding)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("A duplicate key cannot change the committed parameters")
+        assert demo.lookup_order(backend, config["parameters"], binding) == released
     assert list(review.events(io.BytesIO(b': ping\n\ndata: {"ok":\ndata: true}\n\n'))) == [{"ok": True}]
     print("PASS: native graph pause/restore, fresh-process SDK permit, bindings, refusals, races and uncertain outcomes")
 

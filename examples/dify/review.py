@@ -1,4 +1,5 @@
 """Dify's native Human Input API, with an application-owned protected effect."""
+from collections.abc import Callable
 import json
 import os
 from pathlib import Path
@@ -135,7 +136,10 @@ def start(folder, *, base_url, workflow_id, node_id, tenant_id, external_id,
     save(folder, "pending.json", pending)
 
 
-def resume(folder, effect, *, base_url, workflow_id, tenant_id, external_id):
+def resume(folder: str | Path, effect: Callable[[dict[str, object], str], object], *,
+           base_url: str, workflow_id: str, tenant_id: str, external_id: str,
+           lookup: Callable[[dict[str, object], str], object | None] | None = None
+           ) -> dict[str, object]:
     """Consume one permit, resume the native form, then execute one local effect."""
     folder = Path(folder)
     operation = json.loads((folder / "operation.json").read_text())
@@ -146,16 +150,32 @@ def resume(folder, effect, *, base_url, workflow_id, tenant_id, external_id):
             raise ValueError(f"Saved {name} differs from the trusted caller")
     if decision_fingerprint(operation) != pending["operation_hash"]:
         raise ValueError("Operation changed since the native pause")
+    parameters = derive_parameters(operation["parameters"])
+    if parameters is None:
+        raise ValueError("Saved parameters are not bounded flat JSON")
+    binding = decision_fingerprint(dict(operation=operation, pending=pending))
+
+    def read_committed_effect() -> object | None:
+        return lookup(parameters.copy(), binding) if lookup is not None else None
+
+    committed = read_committed_effect()
+    if committed is not None:
+        return {"result": committed, "recovered": True}
     deadline = min(operation["expires_at"], pending["form"]["expiration_time"])
     if time.time() >= deadline:
         return {"blocked": "Approval expired"}
     question = question_for(operation)
     form_path = "/form/human_input/" + quote(pending["token"], safe="")
-    form = api(base_url, form_path)
-    validate_form(form, question)
-    if form != pending["form"]:
-        raise ValueError("The native form changed after it was bound")
-    binding = decision_fingerprint(dict(operation=operation, pending=pending))
+    try:
+        form = api(base_url, form_path)
+        validate_form(form, question)
+        if form != pending["form"]:
+            raise ValueError("The native form changed after it was bound")
+    except Exception:
+        committed = read_committed_effect()
+        if committed is not None:
+            return {"result": committed, "recovered": True}
+        raise
 
     def execute():
         if time.time() >= deadline:
@@ -172,7 +192,13 @@ def resume(folder, effect, *, base_url, workflow_id, tenant_id, external_id):
                     raise ValueError("Native output does not match the approved operation")
                 if time.time() >= deadline:
                     raise TimeoutError("Approval expired before the business effect")
-                return effect(operation["parameters"].copy(), binding)
+                try:
+                    return effect(parameters.copy(), binding)
+                except Exception:
+                    committed = read_committed_effect()
+                    if committed is not None:
+                        return committed
+                    raise
             if run["status"] not in ("running", "paused"):
                 raise RuntimeError("Native workflow did not succeed")
             time.sleep(0.25)
@@ -184,4 +210,9 @@ def resume(folder, effect, *, base_url, workflow_id, tenant_id, external_id):
                      run_id=pending["run_id"], call_id=operation["node_id"],
                      target=operation["target"], actor=tenant_id, question=question,
                      facts={**operation["parameters"], "pushary_binding": binding})
-    return {"result": result.result} if result.ok else {"blocked": result.reason}
+    if result.ok:
+        return {"result": result.result}
+    committed = read_committed_effect()
+    if committed is not None:
+        return {"result": committed, "recovered": True}
+    return {"blocked": result.reason}
