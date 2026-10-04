@@ -24,14 +24,14 @@ DEFAULT_BASE_URL = "https://pushary.com/api/v1/server"
 # little above it to leave room for the round trip without hanging forever.
 DEFAULT_TIMEOUT_SECONDS = 65.0
 
-_SETTINGS_URL = "https://pushary.com/dashboard/settings"
+_SETTINGS_URL = "https://pushary.com/dashboard/agent/settings"
 
 
 class PusharyServer:
     """Client for the Pushary human-in-the-loop decisions API.
 
     Args:
-        api_key: The full API key in the form ``pk_xxx.sk_xxx``.
+        api_key: The full API key in the form ``pk_xxx.xxx``.
         base_url: Override the API base URL. Defaults to the public endpoint.
 
     Raises:
@@ -244,7 +244,7 @@ class PusharyServer:
             )
         if "." not in api_key:
             raise ValueError(
-                "Invalid API key format. Use the full API key (pk_xxx.sk_xxx). "
+                "Invalid API key format. Use the full API key (pk_xxx.xxx). "
                 f"Get your API key from {_SETTINGS_URL}"
             )
 

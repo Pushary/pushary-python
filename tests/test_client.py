@@ -38,12 +38,12 @@ class ApiKeyValidationTests(unittest.TestCase):
     def test_empty_key_raises_value_error(self):
         with self.assertRaises(ValueError) as ctx:
             PusharyServer(api_key="")
-        self.assertIn("dashboard/settings", str(ctx.exception))
+        self.assertIn("dashboard/agent/settings", str(ctx.exception))
 
     def test_key_without_dot_raises_value_error(self):
         with self.assertRaises(ValueError) as ctx:
             PusharyServer(api_key="pk_live_only")
-        self.assertIn("pk_xxx.sk_xxx", str(ctx.exception))
+        self.assertIn("pk_xxx.xxx", str(ctx.exception))
 
     def test_valid_key_constructs(self):
         client = PusharyServer(api_key=VALID_KEY)
