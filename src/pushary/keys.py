@@ -4,9 +4,9 @@ For multi-tenant Partners. Call ``issue`` from your backend with your own
 (unbound, Partner-plan) key to mint a child key bound to a single end-user, hand
 that key to the agent runtime acting for that user, then ``revoke`` it when the
 session ends. A bound key can only create, read and cancel decisions for that
-exact end-user and enroll them, so a prompt-injected agent can never reach another
-of your users. It cannot answer a decision; answer from your server with your
-full-access key.
+exact end-user, so a prompt-injected agent can never reach another of your users.
+It cannot enroll devices or answer a decision; use your server-side full-access
+key for those operations.
 """
 
 from __future__ import annotations
