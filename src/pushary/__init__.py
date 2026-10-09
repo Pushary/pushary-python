@@ -19,15 +19,17 @@ from ._util import deterministic_key, is_approved
 from .client import PusharyServer
 from .decisions import DecisionsResource
 from .keys import KeysResource
+from .reminders import RemindersResource
 from .errors import PusharyError
 from .webhook import SIGNATURE_HEADER, parse_decision_callback, verify_webhook_signature
 
-__version__ = "2.2.1"
+__version__ = "2.3.0"
 
 __all__ = [
     "PusharyServer",
     "DecisionsResource",
     "KeysResource",
+    "RemindersResource",
     "PusharyError",
     "verify_webhook_signature",
     "parse_decision_callback",

@@ -15,6 +15,7 @@ from urllib.parse import quote, urlencode
 
 from .decisions import DecisionsResource
 from .keys import KeysResource
+from .reminders import RemindersResource
 from .errors import PusharyError
 
 DEFAULT_BASE_URL = "https://pushary.com/api/v1/server"
@@ -49,6 +50,7 @@ class PusharyServer:
         self._timeout = DEFAULT_TIMEOUT_SECONDS
         self.decisions = DecisionsResource(self._request)
         self.keys = KeysResource(self._request)
+        self.reminders = RemindersResource(self._request)
 
     def evaluate_authorization(
         self,

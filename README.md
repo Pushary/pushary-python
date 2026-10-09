@@ -263,3 +263,8 @@ These keys intentionally differ from 2.0. Do not replay completed operations dur
 ### Upgrading to 2.2
 
 `ApprovalAsk` accepts `context`. The shared approval gate sends it with the decision, so the approver can read what the notification cannot fit, such as a tool's full arguments. Context is part of the approval identity when set. An ask without context keeps the key it had in 2.1, so pending approvals carry over.
+## Personal reminders
+
+On an active Agent workspace, `client.reminders.schedule("Check the deploy", in_minutes=30)` saves a one-time reminder that survives the agent exiting. Use `at` with an explicit UTC offset for calendar times, up to 30 days away. `client.reminders.list()` lists your pending reminders; `client.reminders.cancel(reminder_id)` cancels one before dispatch starts. Confirm the returned `reminder.fireAt`. Delivery requires a connected phone and can be about a minute late. These personal reminders do not schedule agent work or Partner customer campaigns.
+
+Personal reminder bodies must fit 180 UTF-16 units after secret redaction (most emoji use two); titles must fit 100. Oversized text is rejected. Listing and cancelling accepted reminders remain available when billing access closes.
