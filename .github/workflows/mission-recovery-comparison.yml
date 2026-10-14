@@ -1,0 +1,30 @@
+name: Mission recovery comparison
+on:
+  push:
+    branches: [codex/mission-recovery-reproduction]
+    paths:
+      - .github/workflows/mission-recovery-comparison.yml
+      - examples/dify/mission-recovery-comparison/independent-tests.mjs
+      - examples/dify/mission-recovery-comparison/verify-pack.py
+      - examples/dify/mission-recovery-comparison/verify-results.py
+      - examples/dify/mission-recovery-comparison/run-isolated.sh
+permissions:
+  contents: read
+jobs:
+  offline-reproduction:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Run pinned pack and recovered tests without network or credentials
+        run: bash examples/dify/mission-recovery-comparison/run-isolated.sh "$RUNNER_TEMP/mission-results"
+      - name: Upload result summaries
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: mission-recovery-results
+          path: ${{ runner.temp }}/mission-results
+          if-no-files-found: error
+          retention-days: 14
