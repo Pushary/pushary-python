@@ -12,11 +12,17 @@ The original pack, temporary runtime, raw evidence and local test script were de
 d209935e4470165d98177e8a37c5320ec1dea5117aaa3310c645d7c458aeb0d3
 ```
 
-The original macOS Node v24.3.0 run reported six supplied boundary tests, four supplied recovery scenarios and all seven additional checks passing. Its TAP summaries remain available to the evaluator, but its raw journals were deleted. A new Linux result is a separate evaluation and does not replace the original traces. These evaluations are Codex-assisted, not unaided usability studies or an independent audit by Mission.
+The original macOS Node v24.3.0 run reported six supplied boundary tests, four supplied recovery scenarios and all seven additional checks passing. Its TAP summaries remain available to the evaluator, but its raw journals were deleted. A new Linux result is a separate evaluation and does not replace the original traces. These Pushary evaluations are Codex-assisted, not unaided usability studies. Mission subsequently reported its own reproduction, documented below; this is not a general security or production audit.
 
 ## Fresh verification
 
 The [hosted Linux run](https://github.com/Pushary/pushary-python/actions/runs/38579400224) passed against source commit `477d9f0f0b76f569199bcc483ab412279ef97b4b`: six boundary tests, four recovery cases, and seven additional checks. [Versioned results](results/2026-10-14-linux/README.md) include the isolation, integrity and journal checks.
+
+## Mission’s reported reproduction
+
+On October 14, 2026, [Mission reported all seven checks passing](https://github.com/langgenius/dify/discussions/42319#discussioncomment-18926607) on native macOS 26.3.1 arm64 / Node v22.23.2, alongside the six supplied boundary tests and four recovery scenarios. The baseline verifier and before/after checks of all 88 manifest-listed files passed. They used a sanitized environment and did not reproduce the Docker isolation setup. See the [attributed reproduction record](results/2026-10-14-mission-native/README.md).
+
+Our original macOS traces and hosted Linux temporary raw journals were deleted; public Linux artifacts retain summaries. Mission reports retaining fresh local TAP output and raw journals, which do not reconstruct our earlier deleted evidence. We have not inspected their local raw records.
 
 ## Pinned input
 
@@ -65,4 +71,4 @@ The first four use the pack's worker in fresh processes. The last three invoke u
 
 No live Dify/phone-service recovery, production revocation, real human authentication, distributed fencing, power-loss durability or external exactly-once guarantee is established. No installed Mission product or customer adoption is implied. Missing evidence must not authorize another effect. Permission to execute, proof of a committed effect and hosted/workflow status remain separate observations.
 
-The [engineering-note draft](engineering-note-draft.md) compares these results with the [previously tested Pushary SQLite example](https://github.com/Pushary/pushary-python/tree/f6759b24e62c2d70425706ee3434fbda98e78503/examples/dify). Mission has agreed that a note would be useful, but has not reviewed or approved this manuscript. Its reproduction of these seven checks is still pending.
+The [engineering-note draft](engineering-note-draft.md) compares these results with the [previously tested Pushary SQLite example](https://github.com/Pushary/pushary-python/tree/f6759b24e62c2d70425706ee3434fbda98e78503/examples/dify). Mission has reproduced the seven checks and confirmed that its comparison column matches the bounded evidence. The updated manuscript awaits final review. Joint publication, attribution and distribution are not yet agreed.

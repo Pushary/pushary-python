@@ -1,6 +1,6 @@
 # The agent lost the response. Did the action happen?
 
-Draft prepared by Pushary after Mission agreed that a comparison would be useful. Not jointly reviewed or approved for publication. Evidence is dated; this is not a fresh retest of the Pushary example.
+Draft revised by Pushary after Mission reproduced the additional checks and reviewed its comparison column. This revision awaits final review; joint publication and distribution are not yet agreed. Evidence is dated; this is not a fresh retest of the Pushary example.
 
 A worker can commit an action and die before returning its result. On restart, two questions matter: can another execution be prevented, and can the original outcome be independently confirmed?
 
@@ -28,11 +28,15 @@ Against Mission's unchanged candidate, twelve fresh workers competing to resume 
 
 Two deterministic callback tests also checked stale work: a delayed provider error and a stale negative lookup could not overwrite a newer verified completion. These tests used the real local file store in one process; the concurrent-resume check used separate worker processes.
 
-No counterexample was found within these checks. Both examples use synthetic hosted services or authority/provider fixtures. They do not establish live human authentication, distributed fencing, physical effects, external exactly-once behavior, or an official Dify integration. The evaluations were Codex-assisted and are not unaided usability measurements.
+No counterexample was found within these checks. Both examples use synthetic hosted services or authority/provider fixtures. They do not establish live human authentication, distributed fencing, physical effects, external exactly-once behavior, or an official Dify integration. Pushary’s evaluations were Codex-assisted and are not unaided usability measurements. Mission’s separately reported reproduction is described below.
 
 ## Fresh reproduction artifact
 
-The seven-test script was recovered verbatim from the recorded creation command after the original local evaluation files were deleted. A [fresh GitHub-hosted Linux run](https://github.com/Pushary/pushary-python/actions/runs/38579400224) passed against source revision `477d9f0f0b76f569199bcc483ab412279ef97b4b`. The vendor pack remained unchanged; its hashes and the resulting journals were checked independently of the runner summary. [Commands, source and limits](README.md) and [retained result summaries](results/2026-10-14-linux/README.md) accompany this draft. Mission has not yet reproduced these seven additional checks.
+The seven-test script was recovered verbatim from the recorded creation command after the original local evaluation files were deleted. A [fresh GitHub-hosted Linux run](https://github.com/Pushary/pushary-python/actions/runs/38579400224) passed against source revision `477d9f0f0b76f569199bcc483ab412279ef97b4b`. The vendor pack remained unchanged; its hashes and the resulting journals were checked independently of the runner summary. [Commands, source and limits](README.md) and [retained result summaries](results/2026-10-14-linux/README.md) accompany this draft.
+
+On October 14, 2026, [Mission reported reproducing the seven checks](https://github.com/langgenius/dify/discussions/42319#discussioncomment-18926607) against a fresh extraction of unchanged r2 using Node v22.23.2 on macOS 26.3.1 arm64, natively with a sanitized environment. All seven checks, the six supplied boundary tests, four recovery scenarios and baseline journal/receipt verifier passed. Mission confirmed that the pinned manifest and all 88 listed files matched before and after execution, and that the harness hash matched both public revisions. They reported no mismatch in this scope. They did not reproduce Pushary’s Docker isolation setup.
+
+Pushary’s original macOS traces and the hosted Linux run’s temporary raw journals were deleted. The public Linux artifacts retain summaries. Mission reports retaining its own fresh local TAP output and raw journals; those records do not reconstruct Pushary’s deleted traces. This draft cites Mission’s public report, not a separate inspection by Pushary of those local records.
 
 ## Applying the comparison
 
@@ -42,4 +46,4 @@ The [Pushary Dify example](https://github.com/Pushary/pushary-python/tree/f6759b
 
 ## Review before publication
 
-Ask Mission to reproduce the additional tests and review its column. Preserve the pinned versions and distinguish prior Pushary evidence from the October 14 Mission evaluation. Publish the independent test script alongside any expanded claims about it, after reviewing the sharing location. If both parties agree, use one canonical article and a substantive update in the existing Dify discussion, with links to both examples. Any joint authorship, endorsements or distribution through Mission's channels require their agreement.
+Mission [confirmed that its column matches the bounded evidence](https://github.com/langgenius/dify/discussions/42319#discussioncomment-18926607) and requested the reproduction and evidence-retention updates incorporated here. The historical Pushary pin and the synthetic-authority/provider, single-host and no-production-guarantee limits remain unchanged. The test script and Linux summaries are already public. Final text review is pending; joint publication, attribution and distribution will be agreed separately.
