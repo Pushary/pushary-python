@@ -1,0 +1,1 @@
+Non-loopback networking absent; vendor mount read-only; no Docker socket or credential variables.

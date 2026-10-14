@@ -1,0 +1,3 @@
+source_commit=477d9f0f0b76f569199bcc483ab412279ef97b4b
+archive_sha256=0478a2500e6e6b02804fa4e39ff363ac659928b1bbf8ce2da59425eee5c1b4f9
+independent_exit=0

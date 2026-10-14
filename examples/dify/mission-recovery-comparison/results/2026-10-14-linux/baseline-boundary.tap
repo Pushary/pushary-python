@@ -1,0 +1,14 @@
+✔ packed proxy hold preserves actual binding and the public converter rejects changed input (4.855492ms)
+✔ packed export rejects four substitutions before Gate consumption; exact canonical input still executes once (3.523293ms)
+✔ core Gate rejects changed inputs independently when the converter is bypassed (0.80785ms)
+✔ binding integrity rejection remains intact in the packed export (0.339144ms)
+✔ revoked single-use authority denies exact input without dispatch (0.607595ms)
+✔ a valid binding and structural grant do not substitute for trusted issuer authentication (3.847599ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 85.854553

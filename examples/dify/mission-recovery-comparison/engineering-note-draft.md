@@ -30,6 +30,10 @@ Two deterministic callback tests also checked stale work: a delayed provider err
 
 No counterexample was found within these checks. Both examples use synthetic hosted services or authority/provider fixtures. They do not establish live human authentication, distributed fencing, physical effects, external exactly-once behavior, or an official Dify integration. The evaluations were Codex-assisted and are not unaided usability measurements.
 
+## Fresh reproduction artifact
+
+The seven-test script was recovered verbatim from the recorded creation command after the original local evaluation files were deleted. A [fresh GitHub-hosted Linux run](https://github.com/Pushary/pushary-python/actions/runs/38579400224) passed against source revision `477d9f0f0b76f569199bcc483ab412279ef97b4b`. The vendor pack remained unchanged; its hashes and the resulting journals were checked independently of the runner summary. [Commands, source and limits](README.md) and [retained result summaries](results/2026-10-14-linux/README.md) accompany this draft. Mission has not yet reproduced these seven additional checks.
+
 ## Applying the comparison
 
 For a backend that pauses for a customer's phone approval, keep the approval bound to the exact action and enforce it at the execution boundary. Persist the operation identity before dispatch. After an uncertain response, query the backend's authoritative evidence before reporting success; missing evidence must not silently authorize another attempt.

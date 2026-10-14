@@ -14,6 +14,10 @@ d209935e4470165d98177e8a37c5320ec1dea5117aaa3310c645d7c458aeb0d3
 
 The original macOS Node v24.3.0 run reported six supplied boundary tests, four supplied recovery scenarios and all seven additional checks passing. Its TAP summaries remain available to the evaluator, but its raw journals were deleted. A new Linux result is a separate evaluation and does not replace the original traces. These evaluations are Codex-assisted, not unaided usability studies or an independent audit by Mission.
 
+## Fresh verification
+
+The [hosted Linux run](https://github.com/Pushary/pushary-python/actions/runs/38579400224) passed against source commit `477d9f0f0b76f569199bcc483ab412279ef97b4b`: six boundary tests, four recovery cases, and seven additional checks. [Versioned results](results/2026-10-14-linux/README.md) include the isolation, integrity and journal checks.
+
 ## Pinned input
 
 - [Mission r2 release](https://github.com/gomission/trust-graduation/releases/tag/recovery-evaluation-20261014-r2)

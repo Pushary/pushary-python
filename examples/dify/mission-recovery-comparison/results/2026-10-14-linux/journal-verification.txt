@@ -1,0 +1,4 @@
+normal: independent journal, trace and receipt verification passed
+lost-response: independent journal, trace and receipt verification passed
+missing-evidence: independent journal, trace and receipt verification passed
+revoked: independent journal, trace and receipt verification passed

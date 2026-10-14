@@ -1,0 +1,55 @@
+{
+  "ok": true,
+  "synthetic": true,
+  "external_actions": 0,
+  "artifact_id": "gomission-independent-recovery-20261014-r2",
+  "manifest_sha256": "c344b39b9256529ef20f709fc7176a241a702638e0427654683d48ab45deef48",
+  "environment": {
+    "node": "v24.3.0",
+    "platform": "linux",
+    "arch": "x64"
+  },
+  "elapsed_ms": 1010,
+  "packaged_boundary_tests": 6,
+  "cases": [
+    {
+      "case": "normal completion",
+      "status": "completed",
+      "receipt_verified": true,
+      "dispatch_attempts": 1,
+      "synthetic_effects": 1,
+      "outcome_lookups": 2,
+      "worker_processes": 4
+    },
+    {
+      "case": "lost response after commit",
+      "killed_at": "effect_committed",
+      "status": "completed",
+      "receipt_verified": true,
+      "dispatch_attempts": 1,
+      "synthetic_effects": 1,
+      "outcome_lookups": 2,
+      "worker_processes": 5
+    },
+    {
+      "case": "effect exists but outcome evidence unavailable",
+      "unresolved_status": "outcome_unknown",
+      "recovered_status": "completed",
+      "receipt_verified": true,
+      "dispatch_attempts": 1,
+      "synthetic_effects": 1,
+      "outcome_lookups": 3,
+      "worker_processes": 6
+    },
+    {
+      "case": "permission revoked before resumed execution",
+      "status": "failed",
+      "reason": "grant_revoked",
+      "dispatch_attempts": 0,
+      "synthetic_effects": 0,
+      "outcome_lookups": 0,
+      "worker_processes": 5
+    }
+  ],
+  "limits": "Public reference workflow and test-controlled revocation, local POSIX storage, synthetic authority/provider. No production identity, distributed fencing, live provider, hardware, installed Mission release or independent-user adoption claim."
+}
