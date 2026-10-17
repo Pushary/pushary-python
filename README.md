@@ -56,6 +56,12 @@ waits or your own resume logic, use `create` plus a webhook or `get` below.
 
 ## Framework recipes
 
+### StepFun
+
+[Require customer approval before a Step 5 tool releases an order](examples/stepfun/README.md).
+Persists the model proposal and tool-call IDs across worker restarts, uses one-use
+execution permits, and includes a runnable offline demonstration.
+
 ### Agno
 
 [Persist an Agno workflow pause and resume after customer phone approval](examples/agno/README.md).
