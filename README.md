@@ -7,8 +7,8 @@ dependency (Python standard library only) and targets Python 3.9 and newer.
 
 ## What you need
 
-- A Pushary Partner plan, from $99 a month. [Start the trial](https://pushary.com/sign-up?from=agent&plan=partner).
-- An API key from [Partner onboarding](https://pushary.com/onboarding/partner), set as `PUSHARY_API_KEY`.
+- A Pushary Partner plan, from $99 a month. [Start the trial](https://pushary.com/sign-up?from=agent&plan=partner&utm_source=github&utm_medium=oss-adapter&utm_campaign=pushary-python&utm_content=partner-start).
+- An API key from [Partner onboarding](https://pushary.com/onboarding/partner?utm_source=github&utm_medium=oss-adapter&utm_campaign=pushary-python&utm_content=partner-start), set as `PUSHARY_API_KEY`.
 - Your users install the free Pushary app ([iPhone](https://apps.apple.com/us/app/pushary/id6785677563), [Android](https://play.google.com/store/apps/details?id=com.pushary.app)). They never sign up or pay.
 
 ## Installation
@@ -21,7 +21,7 @@ pip install pushary
 
 The SDK needs your full API key (`pk_xxx.sk_xxx`), which includes the secret
 half. Never expose it in client-side code. Get your key from your
-[Pushary dashboard](https://pushary.com/docs/agents/api-key).
+[Pushary dashboard](https://pushary.com/onboarding/partner?utm_source=github&utm_medium=oss-adapter&utm_campaign=pushary-python&utm_content=partner-start).
 
 ```python
 import os
