@@ -23,7 +23,7 @@ from .reminders import RemindersResource
 from .errors import PusharyError
 from .webhook import SIGNATURE_HEADER, parse_decision_callback, verify_webhook_signature
 
-__version__ = "2.4.0"
+__version__ = "2.4.1"
 
 __all__ = [
     "PusharyServer",

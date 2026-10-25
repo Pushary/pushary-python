@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pushary"
-version = "2.4.0"
-description = "The decision layer for AI agents. Your agent asks, your user decides on their phone."
+version = "2.4.1"
+description = "Human-in-the-loop (HITL) for AI agents: ask a person for approvals or answers by push notification."
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }

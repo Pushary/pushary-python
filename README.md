@@ -1,6 +1,6 @@
 # pushary
 
-The decision layer for AI agents. Your agent asks, your user decides on their phone.
+Human-in-the-loop (HITL) for AI agents. Your agent asks, and a person approves or answers on their phone by push notification.
 
 This is the Python counterpart of the `@pushary/server` SDK. It is zero
 dependency (Python standard library only) and targets Python 3.9 and newer.
